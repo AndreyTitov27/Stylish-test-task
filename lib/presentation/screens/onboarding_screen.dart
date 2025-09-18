@@ -51,14 +51,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             itemBuilder: (context, index) {
               return Padding(
                 padding: EdgeInsetsGeometry.symmetric(horizontal: 16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Stack(
+                  alignment: AlignmentGeometry.center,
                   children: [
-                    SvgPicture.asset(_destinations[index].image),
-                    Text(_destinations[index].title, style: OnboardingTextStyles.large),
-                    SizedBox(height: 10.0),
-                    Text(_destinations[index].subtitle, style: OnboardingTextStyles.small,
-                      textAlign: TextAlign.center),
+                    Align(
+                      alignment: Alignment(0.0, -0.3),
+                      child: SvgPicture.asset(_destinations[index].image),
+                    ),
+                    Align(
+                      alignment: Alignment(0.0, 0.3),
+                      child: Column(
+                        spacing: 10.0,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(_destinations[index].title, style: OnboardingTextStyles.large),
+                          Text(_destinations[index].subtitle, style: OnboardingTextStyles.small,
+                            textAlign: TextAlign.center),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -77,7 +88,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     Text('/3', style: OnboardingTextStyles.mediumGray),
                   ]
                 ),
-                TextButton(onPressed: (){print('TAPPED');},
+                TextButton(onPressed: () => Navigator.pushReplacementNamed(context, '/signUp'),
                   style: TextButton.styleFrom(
                     overlayColor: Colors.transparent,
                     padding: EdgeInsets.only(right: 16.0),
@@ -95,7 +106,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   Align(
                     alignment: AlignmentGeometry.bottomLeft,
-                    child: TextButton(onPressed: (){},
+                    child: TextButton(onPressed: _onPrevTap,
                     style: TextButton.styleFrom(
                       overlayColor: Colors.transparent,
                       padding: EdgeInsets.only(left: 16.0),
@@ -107,16 +118,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   Align(
                     alignment: AlignmentGeometry.bottomCenter,
                     child: Row(
-                      spacing: 4.0,
+                      spacing: 8.0,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(_destinations.length, (index) {
                         final isActive = _currentPage == index;
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
-                          height: 8.0,
-                          width: isActive ? 20.0 : 8.0,
+                          height: isActive ? 8.0 : 10.0,
+                          width: isActive ? 40.0 : 10.0,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4.0),
+                            borderRadius: BorderRadius.circular(9999.0),
                             color: isActive ? Color(0xFF17223B) : Color(0xFF17223B).withAlpha((255 * 0.2).round()),
                           ),
                         );
@@ -125,14 +136,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                   Align(
                     alignment: AlignmentGeometry.bottomRight,
-                    child: TextButton(onPressed: (){},
+                    child: TextButton(
+                      onPressed: _onNextTap,
                       style: TextButton.styleFrom(
                         overlayColor: Colors.transparent,
                         padding: EdgeInsetsGeometry.only(right: 16.0),
                         minimumSize: Size(0, 0),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: Text('Next', style: OnboardingTextStyles.mediumRed)),
+                      child: Text(_currentPage == 2 ? 'Get Started' : 'Next', style: OnboardingTextStyles.mediumRed),
+                    ),
                   ),
                 ],
               ),
@@ -141,5 +154,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ],
       ),
     );
+  }
+  void _onNextTap() {
+    setState(() {
+      if (_currentPage < 2) {
+        _pageController.animateToPage(
+          ++_currentPage,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+      else {
+        Navigator.pushReplacementNamed(context, '/signUp');
+      }
+    });
+  }
+  void _onPrevTap() {
+    setState(() {
+      if (_currentPage > 0) {
+        _pageController.animateToPage(
+          --_currentPage,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 }

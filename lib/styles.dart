@@ -39,3 +39,28 @@ class OnboardingTextStyles {
     fontWeight: FontWeight.w600,
   );
 }
+class SignTextStyles {
+  static const TextStyle large = TextStyle(
+    color: Color(0xFF000000),
+    fontSize: 36.0,
+    fontWeight: FontWeight.w700,
+  );
+  static const TextStyle buttonText = TextStyle(
+    color: Color(0xFFFFFFFF),
+    fontSize: 20.0,
+    fontWeight: FontWeight.w600,
+  );
+  static const TextStyle bottomText = TextStyle(
+    color: Color(0xFF575757),
+    fontSize: 14.0,
+    fontWeight: FontWeight.w400,
+  );
+  static const TextStyle bottomTextRed = TextStyle(
+    color: Color(0xFFF83758),
+    fontSize: 14.0,
+    fontWeight: FontWeight.w600,
+    decoration: TextDecoration.underline,
+    decorationColor: Color(0xFFF83758),
+    decorationThickness: 2.0,
+  );
+}
