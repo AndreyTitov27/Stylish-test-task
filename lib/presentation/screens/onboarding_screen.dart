@@ -15,9 +15,12 @@ class OnboardingScreen extends StatefulWidget {
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends State<OnboardingScreen> with TickerProviderStateMixin {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  String _nextButtonText = 'Next';
+  late final AnimationController _controller;
+  late Animation<Offset> _offsetAnimation;
   final List<OnboardingDestination> _destinations = [
     const OnboardingDestination(
       title: 'Choose Products',
@@ -40,6 +43,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ];
 
   @override
+  void initState() {
+    _controller = AnimationController(vsync: this, duration: Duration(milliseconds: 150));
+    _offsetAnimation = Tween<Offset>(
+      begin: Offset(0.0, 0.0), end: Offset(1.5, 0.0),
+    ).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
@@ -47,7 +67,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           PageView.builder(
             controller: _pageController,
             itemCount: _destinations.length,
-            onPageChanged: (index) => setState(() => _currentPage = index),
+            onPageChanged: (index) => setState(() {
+              if (index > _currentPage) {
+                if (index == 2) animateNextButton();
+              } else if (index < _currentPage) {
+                if (index == 1) animateNextButton();
+              }
+              _currentPage = index;
+            }),
             itemBuilder: (context, index) {
               return Padding(
                 padding: EdgeInsetsGeometry.symmetric(horizontal: 16.0),
@@ -100,23 +127,44 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           Align(
             alignment: AlignmentGeometry.bottomCenter,
-            child: Padding(
-              padding: EdgeInsetsGeometry.only(bottom: MediaQuery.of(context).padding.bottom),
-                child: Stack(
-                children: [
-                  Align(
-                    alignment: AlignmentGeometry.bottomLeft,
-                    child: TextButton(onPressed: _onPrevTap,
-                    style: TextButton.styleFrom(
-                      overlayColor: Colors.transparent,
-                      padding: EdgeInsets.only(left: 16.0),
-                      minimumSize: Size(0, 0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            child: Stack(
+              children: [
+                Align(
+                  alignment: AlignmentGeometry.bottomLeft,
+                  child: AnimatedSlide(
+                    offset: _currentPage == 0
+                      ? Offset(-1.5, 0.0)
+                      : Offset(0.0, 0.0),
+                    curve: _currentPage == 0 ? Curves.easeIn : Curves.easeOut,
+                    duration: Duration(milliseconds: 300),
+                    child: TextButton(
+                      onPressed: _onPrevTap,
+                      style: TextButton.styleFrom(
+                        overlayColor: Colors.transparent,
+                        padding: EdgeInsets.symmetric(
+                          vertical: MediaQuery.of(context).padding.bottom != 0.0
+                            ? MediaQuery.of(context).padding.bottom
+                            : 16.0,
+                          horizontal: 16.0,
+                        ),
+                        minimumSize: Size(0, 0),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        'Prev',
+                        style: OnboardingTextStyles.mediumGray,
+                      ),
                     ),
-                      child: Text('Prev', style: OnboardingTextStyles.mediumGray)),
                   ),
-                  Align(
-                    alignment: AlignmentGeometry.bottomCenter,
+                ),
+                Align(
+                  alignment: AlignmentGeometry.bottomCenter,
+                  child: Padding(
+                    padding: EdgeInsetsGeometry.only(
+                      bottom: MediaQuery.of(context).padding.bottom != 0.0
+                        ? MediaQuery.of(context).padding.bottom
+                        : 16.0,
+                    ),
                     child: Row(
                       spacing: 8.0,
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -128,27 +176,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           width: isActive ? 40.0 : 10.0,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(9999.0),
-                            color: isActive ? Color(0xFF17223B) : Color(0xFF17223B).withAlpha((255 * 0.2).round()),
+                            color: isActive
+                              ? Color(0xFF17223B)
+                              : Color(0xFF17223B).withAlpha((255 * 0.2).round()),
                           ),
                         );
                       }),
                     ),
                   ),
-                  Align(
-                    alignment: AlignmentGeometry.bottomRight,
+                ),
+                Align(
+                  alignment: AlignmentGeometry.bottomRight,
+                  child: SlideTransition(
+                    position: _offsetAnimation,
                     child: TextButton(
                       onPressed: _onNextTap,
                       style: TextButton.styleFrom(
                         overlayColor: Colors.transparent,
-                        padding: EdgeInsetsGeometry.only(right: 16.0),
+                        padding: EdgeInsetsGeometry.symmetric(
+                          vertical: MediaQuery.of(context).padding.bottom != 0.0
+                            ? MediaQuery.of(context).padding.bottom
+                            : 16.0,
+                          horizontal: 16.0,
+                        ),
                         minimumSize: Size(0, 0),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: Text(_currentPage == 2 ? 'Get Started' : 'Next', style: OnboardingTextStyles.mediumRed),
+                      child: Text(
+                        _nextButtonText,
+                        style: OnboardingTextStyles.mediumRed,
+                      ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
@@ -158,13 +219,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _onNextTap() {
     setState(() {
       if (_currentPage < 2) {
+        if (_currentPage == 1) {
+          animateNextButton();
+        }
         _pageController.animateToPage(
           ++_currentPage,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
         );
-      }
-      else {
+      } else {
         Navigator.pushReplacementNamed(context, '/signUp');
       }
     });
@@ -172,6 +235,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _onPrevTap() {
     setState(() {
       if (_currentPage > 0) {
+        if (_currentPage == 2) {
+          animateNextButton();
+        }
         _pageController.animateToPage(
           --_currentPage,
           duration: const Duration(milliseconds: 300),
@@ -179,5 +245,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         );
       }
     });
+  }
+  Future<void> animateNextButton() async {
+    _offsetAnimation = Tween<Offset>(
+      begin: Offset(0.0, 0.0), end: Offset(1.5, 0.0),
+    ).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    );
+    await _controller.forward();
+    setState(() {
+      if (_currentPage == 2) {
+        _nextButtonText = 'Get Started';
+      } else if (_currentPage == 1) {
+        _nextButtonText = 'Next';
+      }
+      _offsetAnimation = Tween<Offset>(
+      begin: Offset(0.0, 0.0), end: Offset(1.5, 0.0),
+    ).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+    });
+    await _controller.reverse();
   }
 }

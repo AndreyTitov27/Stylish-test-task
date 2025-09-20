@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:stylish_test_task/presentation/screens/home_screen.dart';
 import 'package:stylish_test_task/presentation/screens/onboarding_screen.dart';
+import 'package:stylish_test_task/presentation/screens/set_up_screen.dart';
 import 'package:stylish_test_task/presentation/screens/sign_in_screen.dart';
 import 'package:stylish_test_task/presentation/screens/sign_up_screen.dart';
 
@@ -13,15 +15,23 @@ class StylishApp extends StatelessWidget {
     return MaterialApp(
       initialRoute: initialRoute,
       routes: {
-        '/onboarding': (context) => OnboardingScreen(),
-        '/signIn': (context) => SignInScreen(),
-        '/signUp': (context) => SignUpScreen(),
-        '/home': (context) => HomeScreen(),
+        '/onboarding': (_) => OnboardingScreen(),
+        '/signIn': (_) => SignInScreen(),
+        '/signUp': (_) => SignUpScreen(),
+        '/setUp': (_) => SetUpScreen(),
+        '/home': (_) => HomeScreen(),
       },
       theme: ThemeData(
         fontFamily: 'Montserrat',
       ),
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        precacheImage(AssetImage('assets/images/home_screen_backgroung.png'), context);
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent),
+          child: child!,
+        );
+      },
     );
   }
 }

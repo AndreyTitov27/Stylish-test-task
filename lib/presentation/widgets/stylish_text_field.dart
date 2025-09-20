@@ -3,9 +3,20 @@ import 'package:flutter/cupertino.dart';
 
 class StylishTextField extends StatefulWidget {
   final bool isPassword;
+  final TextEditingController? controller;
+  final FocusNode? focusNode;
   final String? placeHolder;
   final IconData? icon;
-  const StylishTextField({super.key, this.isPassword = false, this.placeHolder, this.icon});
+  final ValueChanged<String>? onSubmitted;
+  const StylishTextField({
+    super.key,
+    this.isPassword = false,
+    this.controller,
+    this.focusNode,
+    this.placeHolder,
+    this.icon,
+    this.onSubmitted,
+  });
 
   @override
   State<StatefulWidget> createState() => _StylishTextFieldState();
@@ -18,6 +29,8 @@ class _StylishTextFieldState extends State<StylishTextField> {
     return Container(
       height: 55.0,
       child: CupertinoTextField(
+        controller: widget.controller,
+        focusNode: widget.focusNode,
         decoration: BoxDecoration(
           color: Color(0xFFF3F3F3),
           border: Border.all(color: Color(0xFFA8A8A9)),
@@ -48,6 +61,7 @@ class _StylishTextFieldState extends State<StylishTextField> {
         ),
         textAlignVertical: TextAlignVertical.center,
         obscureText: widget.isPassword ? _obscure : false,
+        onSubmitted: widget.onSubmitted,
       ),
     );
   }
