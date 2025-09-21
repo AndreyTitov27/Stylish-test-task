@@ -99,7 +99,12 @@ class _SignInScreenState extends State<SignInScreen> {
     if (success) {
       await storageProvider.loadText(authProvider.user!.uid);
       if (context.mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+        if (storageProvider.userText == null) {
+          Navigator.pushReplacementNamed(context, '/setUp');
+        }
+        else {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
     } else {
       if (context.mounted) {

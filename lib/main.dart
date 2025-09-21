@@ -27,7 +27,11 @@ Future<void> main() async {
   if (currentUser != null) {
     final StorageService storage = StorageService();
     userText = await storage.loadText(currentUser.uid);
-    initialRoute = '/home';
+    if (userText == null) {
+      initialRoute = '/setUp';
+    } else {
+      initialRoute = '/home';
+    }
   } else if (showOnboarding) {
     initialRoute = '/onboarding';
     await sharedPreferences.setBool('firstLaunch', false);
@@ -42,7 +46,7 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
+        ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider(user: currentUser)),
         ChangeNotifierProvider<StorageProvider>(create: (_) => StorageProvider(userText: userText)),
       ],
       child: StylishApp(initialRoute: initialRoute),

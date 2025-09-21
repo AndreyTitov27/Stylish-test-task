@@ -229,7 +229,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         _pageController.animateToPage(
           ++_currentPage,
           duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
+          curve: Curves.fastOutSlowIn,
         );
       } else {
         Navigator.pushReplacementNamed(context, '/signUp');
@@ -245,7 +245,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         _pageController.animateToPage(
           --_currentPage,
           duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
+          curve: Curves.fastOutSlowIn,
         );
       }
     });

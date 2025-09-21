@@ -9,7 +9,7 @@ class AuthProvider extends ChangeNotifier {
   User? _user;
   User? get user => _user;
 
-  AuthProvider() {
+  AuthProvider({User? user}) : _user = user {
     _authService.authStateChanges.listen((user) {
       _user = user;
       notifyListeners();
