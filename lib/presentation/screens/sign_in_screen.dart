@@ -7,6 +7,7 @@ import 'package:stylish_test_task/presentation/providers/storage_provider.dart';
 import 'package:stylish_test_task/styles.dart';
 import 'package:stylish_test_task/presentation/widgets/stylish_text_field.dart';
 import 'package:stylish_test_task/utils/error_message_util.dart';
+import 'package:stylish_test_task/utils/loading_dialog_util.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -24,6 +25,7 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: EdgeInsetsGeometry.only(
           left: 32.0,
@@ -85,13 +87,15 @@ class _SignInScreenState extends State<SignInScreen> {
       showErrorMessage(context, 'Password must be at least 8 characters');
       return;
     }
-    FocusScope.of(context).unfocus();
+    FocusScope.of(context).requestFocus(FocusNode());
+    showLoadingDialog(context);
     final authProvider = context.read<AuthProvider>();
     final storageProvider = context.read<StorageProvider>();
     final success = await authProvider.signIn(
       emailController.text.trim(),
       passwordController.text.trim(),
     );
+    if (context.mounted) Navigator.pop(context);
     if (success) {
       await storageProvider.loadText(authProvider.user!.uid);
       if (context.mounted) {

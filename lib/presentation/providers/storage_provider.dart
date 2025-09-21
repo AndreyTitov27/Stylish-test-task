@@ -6,7 +6,7 @@ class StorageProvider extends ChangeNotifier {
   String? _userText;
   String? get userText => _userText;
 
-  StorageProvider();
+  StorageProvider({String? userText}) : _userText = userText;
 
   void setUserText(String text) => _userText = text;
 

@@ -6,6 +6,7 @@ import 'package:stylish_test_task/presentation/providers/storage_provider.dart';
 import 'package:stylish_test_task/presentation/widgets/stylish_text_field.dart';
 import 'package:stylish_test_task/styles.dart';
 import 'package:stylish_test_task/utils/error_message_util.dart';
+import 'package:stylish_test_task/utils/loading_dialog_util.dart';
 
 class SetUpScreen extends StatefulWidget {
   const SetUpScreen({super.key});
@@ -19,6 +20,7 @@ class _SetUpScreenState extends State<SetUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: EdgeInsetsGeometry.only(
           left: 32.0,
@@ -30,7 +32,12 @@ class _SetUpScreenState extends State<SetUpScreen> {
           spacing: 32.0,
           children: [
             Text('Set up\naccount', style: SignTextStyles.large, textAlign: TextAlign.left),
-            StylishTextField(controller: _controller, placeHolder: 'Enter any text', icon: Icons.person),
+            StylishTextField(
+              controller: _controller,
+              placeHolder: 'Enter any text',
+              icon: Icons.person,
+              onSubmitted: (_) => _onFinishTap(context),
+            ),
             CupertinoButton.filled(
               color: Color(0xFFF83758),
               minimumSize: Size(double.infinity, 55.0),
@@ -47,7 +54,8 @@ class _SetUpScreenState extends State<SetUpScreen> {
     if (_controller.text.trim().isEmpty) {
       showErrorMessage(context, 'Text cannot be empty');
     } else {
-      FocusScope.of(context).unfocus();
+      FocusScope.of(context).requestFocus(FocusNode());
+      showLoadingDialog(context);
       final authProvider = context.read<AuthProvider>();
       final storageProvider = context.read<StorageProvider>();
       await storageProvider.saveText(authProvider.user!.uid, _controller.text.trim());

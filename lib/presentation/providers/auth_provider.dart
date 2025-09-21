@@ -25,6 +25,10 @@ class AuthProvider extends ChangeNotifier {
     } on FirebaseAuthException catch (e) {
       if (e.code == 'invalid-credential') {
         _errorMessage = 'Invalid email or password';
+      } else if (e.code == 'too-many-requests') {
+        _errorMessage = 'Too many requests, try again later';
+      } else {
+        _errorMessage = 'Something went wrong';
       }
       notifyListeners();
       return false;
@@ -39,6 +43,10 @@ class AuthProvider extends ChangeNotifier {
     } on FirebaseAuthException catch(e) {
       if (e.code == 'email-already-in-use') {
         _errorMessage = 'An account already exists with this email';
+      } else if (e.code == 'too-many-requests') {
+        _errorMessage = 'Too many requests, try again later';
+      } else {
+        _errorMessage = 'Something went wrong';
       }
       notifyListeners();
       return false;

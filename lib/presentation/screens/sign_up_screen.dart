@@ -5,6 +5,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:stylish_test_task/presentation/providers/auth_provider.dart';
 import 'package:stylish_test_task/presentation/widgets/stylish_text_field.dart';
 import 'package:stylish_test_task/utils/error_message_util.dart';
+import 'package:stylish_test_task/utils/loading_dialog_util.dart';
 import 'package:stylish_test_task/styles.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -98,12 +99,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       showErrorMessage(context, 'Password must be at least 8 characters');
       return;
     }
-    FocusScope.of(context).unfocus();
+    FocusScope.of(context).requestFocus(FocusNode());
+    showLoadingDialog(context);
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.signUp(
       emailController.text.trim(),
       passwordController.text.trim(),
     );
+    if (context.mounted) Navigator.pop(context);
     if (success) {
       if (context.mounted) {
         Navigator.pushReplacementNamed(context, '/setUp');

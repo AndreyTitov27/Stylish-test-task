@@ -48,7 +48,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     _offsetAnimation = Tween<Offset>(
       begin: Offset(0.0, 0.0), end: Offset(1.5, 0.0),
     ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutExpo),
     );
     super.initState();
   }
@@ -102,28 +102,32 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
               );
             },
           ),
-          Padding(
-            padding: EdgeInsetsGeometry.only(
-              left: 16.0, top: MediaQuery.of(context).padding.top + 24.0,
+          Align(
+            alignment: AlignmentGeometry.topLeft,
+            child: Padding(
+              padding: EdgeInsetsGeometry.only(left: 16.0,
+                top: MediaQuery.of(context).padding.top + 24.0,
+              ),
+              child: Row(
+                children: [
+                  Text('${_currentPage + 1}', style: OnboardingTextStyles.medium),
+                  Text('/3', style: OnboardingTextStyles.mediumGray),
+                ]
+              ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Text('${_currentPage + 1}', style: OnboardingTextStyles.medium),
-                    Text('/3', style: OnboardingTextStyles.mediumGray),
-                  ]
+          ),
+          Align(
+            alignment: AlignmentGeometry.topRight,
+            child: TextButton(onPressed: () => Navigator.pushReplacementNamed(context, '/signUp'),
+              style: TextButton.styleFrom(
+                overlayColor: Colors.transparent,
+                padding: EdgeInsets.symmetric(
+                  vertical: MediaQuery.of(context).padding.top + 24.0,
+                  horizontal : 16.0,
                 ),
-                TextButton(onPressed: () => Navigator.pushReplacementNamed(context, '/signUp'),
-                  style: TextButton.styleFrom(
-                    overlayColor: Colors.transparent,
-                    padding: EdgeInsets.only(right: 16.0),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text('Skip', style: OnboardingTextStyles.medium)),
-              ],
-            ),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text('Skip', style: OnboardingTextStyles.medium)),
           ),
           Align(
             alignment: AlignmentGeometry.bottomCenter,
@@ -135,7 +139,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                     offset: _currentPage == 0
                       ? Offset(-1.5, 0.0)
                       : Offset(0.0, 0.0),
-                    curve: _currentPage == 0 ? Curves.easeIn : Curves.easeOut,
+                    curve: _currentPage == 0 ? Curves.easeInExpo : Curves.easeOutExpo,
                     duration: Duration(milliseconds: 300),
                     child: TextButton(
                       onPressed: _onPrevTap,
@@ -247,11 +251,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     });
   }
   Future<void> animateNextButton() async {
-    _offsetAnimation = Tween<Offset>(
-      begin: Offset(0.0, 0.0), end: Offset(1.5, 0.0),
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
     await _controller.forward();
     setState(() {
       if (_currentPage == 2) {
@@ -259,11 +258,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
       } else if (_currentPage == 1) {
         _nextButtonText = 'Next';
       }
-      _offsetAnimation = Tween<Offset>(
-      begin: Offset(0.0, 0.0), end: Offset(1.5, 0.0),
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
     });
     await _controller.reverse();
   }

@@ -4,12 +4,14 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:stylish_test_task/app.dart';
 import 'package:stylish_test_task/firebase_options.dart';
 import 'package:stylish_test_task/presentation/providers/auth_provider.dart';
 import 'package:stylish_test_task/presentation/providers/storage_provider.dart';
+import 'package:stylish_test_task/services/storage_service.dart';
 
-void main() async {
+Future<void> main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
@@ -19,14 +21,21 @@ void main() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final bool showOnboarding = sharedPreferences.getBool('firstLaunch') ?? true;
+  final currentUser = auth.FirebaseAuth.instance.currentUser;
+  String? userText;
   String initialRoute = '/signIn';
-  if (showOnboarding) {
+  if (currentUser != null) {
+    final StorageService storage = StorageService();
+    userText = await storage.loadText(currentUser.uid);
+    initialRoute = '/home';
+  } else if (showOnboarding) {
     initialRoute = '/onboarding';
+    await sharedPreferences.setBool('firstLaunch', false);
   }
 
   final elapsedTime = DateTime.now().difference(startTime);
   if (elapsedTime < minSplashDuration) {
-    await Future.delayed(elapsedTime);
+    await Future.delayed(minSplashDuration - elapsedTime);
   }
   FlutterNativeSplash.remove();
 
@@ -34,7 +43,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
-        ChangeNotifierProvider<StorageProvider>(create: (_) => StorageProvider()),
+        ChangeNotifierProvider<StorageProvider>(create: (_) => StorageProvider(userText: userText)),
       ],
       child: StylishApp(initialRoute: initialRoute),
     ),
