@@ -1,18 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:stylish_test_task/presentation/providers/auth_provider.dart';
-import 'package:stylish_test_task/presentation/providers/storage_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:stylish_test_task/riverpod/auth_provider.dart';
+import 'package:stylish_test_task/riverpod/storage_provider.dart';
 import 'package:stylish_test_task/styles.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
@@ -62,10 +62,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text('Test completed', style: HomeTextStyles.large),
                   SizedBox(height: 10.0),
                   Text('You are signed in as:', style: HomeTextStyles.small),
-                  Text(context.watch<AuthProvider>().user?.email ?? 'null',  style: HomeTextStyles.small),
+                  Text(ref.watch(authNotifierProvider).value?.email ?? 'null',  style: HomeTextStyles.small),
                   SizedBox(height: 10.0),
                   Text('Your text is:',  style: HomeTextStyles.small),
-                  Text(context.watch<StorageProvider>().userText ?? 'null',  style: HomeTextStyles.small),
+                  Text(ref.watch(storageNotifierProvider).value ?? 'null',  style: HomeTextStyles.small),
                 ],
               ),
             ),
@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Color(0xFFF83758),
               minimumSize: Size(double.infinity, 55.0),
               borderRadius: BorderRadius.circular(4.0),
-              onPressed: () => _onLogOutTap(context),
+              onPressed: () => _onLogOutTap(context, ref),
               child: Text('Log out', style: SignTextStyles.buttonText),
             ),
           ),
@@ -86,8 +86,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-  Future<void> _onLogOutTap(BuildContext context) async {
-    await context.read<AuthProvider>().signOut();
+  Future<void> _onLogOutTap(BuildContext context, WidgetRef ref) async {
+    await ref.read(authNotifierProvider.notifier).signOut();
     if (context.mounted) Navigator.pushReplacementNamed(context, '/signIn');
   }
 }

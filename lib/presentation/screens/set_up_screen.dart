@@ -1,20 +1,20 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:stylish_test_task/presentation/providers/auth_provider.dart';
-import 'package:stylish_test_task/presentation/providers/storage_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stylish_test_task/presentation/widgets/stylish_text_field.dart';
+import 'package:stylish_test_task/riverpod/auth_provider.dart';
+import 'package:stylish_test_task/riverpod/storage_provider.dart';
 import 'package:stylish_test_task/styles.dart';
 import 'package:stylish_test_task/utils/error_message_util.dart';
 import 'package:stylish_test_task/utils/loading_dialog_util.dart';
 
-class SetUpScreen extends StatefulWidget {
+class SetUpScreen extends ConsumerStatefulWidget {
   const SetUpScreen({super.key});
 
   @override
-  State<SetUpScreen> createState() => _SetUpScreenState();
+  ConsumerState<SetUpScreen> createState() => _SetUpScreenState();
 }
-class _SetUpScreenState extends State<SetUpScreen> {
+class _SetUpScreenState extends ConsumerState<SetUpScreen> {
   final TextEditingController _controller = TextEditingController();
 
   @override
@@ -56,9 +56,8 @@ class _SetUpScreenState extends State<SetUpScreen> {
     } else {
       FocusScope.of(context).requestFocus(FocusNode());
       showLoadingDialog(context);
-      final authProvider = context.read<AuthProvider>();
-      final storageProvider = context.read<StorageProvider>();
-      await storageProvider.saveText(authProvider.user!.uid, _controller.text.trim());
+      await ref.read(storageNotifierProvider.notifier)
+        .saveText(ref.read(authNotifierProvider).value!.uid, _controller.text.trim());
       if (context.mounted) Navigator.pushReplacementNamed(context, '/home');
     }
   }

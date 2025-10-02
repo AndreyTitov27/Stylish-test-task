@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:stylish_test_task/presentation/providers/auth_provider.dart';
-import 'package:stylish_test_task/presentation/providers/storage_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:stylish_test_task/riverpod/auth_provider.dart';
+import 'package:stylish_test_task/riverpod/storage_provider.dart';
 import 'package:stylish_test_task/styles.dart';
 import 'package:stylish_test_task/presentation/widgets/stylish_text_field.dart';
 import 'package:stylish_test_task/utils/error_message_util.dart';
 import 'package:stylish_test_task/utils/loading_dialog_util.dart';
 
-class SignInScreen extends StatefulWidget {
+class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
   
   @override
-  State<SignInScreen> createState() => _SignInScreenState();
+  ConsumerState<SignInScreen> createState() => _SignInScreenState();
 
 }
 
-class _SignInScreenState extends State<SignInScreen> {
+class _SignInScreenState extends ConsumerState<SignInScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final FocusNode passwordFocus = FocusNode();
@@ -89,17 +89,15 @@ class _SignInScreenState extends State<SignInScreen> {
     }
     FocusScope.of(context).requestFocus(FocusNode());
     showLoadingDialog(context);
-    final authProvider = context.read<AuthProvider>();
-    final storageProvider = context.read<StorageProvider>();
-    final success = await authProvider.signIn(
+    final success = await ref.read(authNotifierProvider.notifier).signIn(
       emailController.text.trim(),
       passwordController.text.trim(),
     );
     if (context.mounted) Navigator.pop(context);
     if (success) {
-      await storageProvider.loadText(authProvider.user!.uid);
+      await ref.read(storageNotifierProvider.notifier).loadText(ref.read(authNotifierProvider).value!.uid);
       if (context.mounted) {
-        if (storageProvider.userText == null) {
+        if (ref.read(storageNotifierProvider).value == null) {
           Navigator.pushReplacementNamed(context, '/setUp');
         }
         else {
@@ -108,7 +106,7 @@ class _SignInScreenState extends State<SignInScreen> {
       }
     } else {
       if (context.mounted) {
-        showErrorMessage(context, authProvider.errorMessage ?? 'Something went wrong');
+        showErrorMessage(context, ref.read(authNotifierProvider.notifier).errorMessage ?? 'Something went wrong');
       }
     }
   }

@@ -1,26 +1,33 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stylish_test_task/services/auth_service.dart';
 
-class AuthProvider extends ChangeNotifier {
-  final AuthService _authService = AuthService();
+final authNotifierProvider = AsyncNotifierProvider<AuthNotifier, User?>(AuthNotifier.new);
+
+class AuthNotifier extends AsyncNotifier<User?> {
+  final _authService = AuthService();
+  final User? _initialUser;
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
-  User? _user;
-  User? get user => _user;
+  
+  AuthNotifier({User? user}) : _initialUser = user;
 
-  AuthProvider({User? user}) : _user = user {
+  @override
+  FutureOr<User?> build() {
     _authService.authStateChanges.listen((user) {
-      _user = user;
-      notifyListeners();
+      state = AsyncValue.data(user);
     });
+    state = AsyncValue.data(_initialUser);
+    return state.value;
   }
 
   Future<bool> signIn(String email, String password) async {
+    state = const AsyncValue.loading();
     try {
       await _authService.signIn(email, password);
       _errorMessage = null;
-      notifyListeners();
       return true;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'invalid-credential') {
@@ -30,15 +37,15 @@ class AuthProvider extends ChangeNotifier {
       } else {
         _errorMessage = 'Something went wrong';
       }
-      notifyListeners();
+      state = AsyncValue.error(e, e.stackTrace ?? StackTrace.current);
       return false;
     }
   }
   Future<bool> signUp(String email, String password) async {
+    state = const AsyncValue.loading();
     try {
       await _authService.signUp(email, password);
       _errorMessage = null;
-      notifyListeners();
       return true;
     } on FirebaseAuthException catch(e) {
       if (e.code == 'email-already-in-use') {
@@ -48,11 +55,12 @@ class AuthProvider extends ChangeNotifier {
       } else {
         _errorMessage = 'Something went wrong';
       }
-      notifyListeners();
+      state = AsyncValue.error(e, e.stackTrace ?? StackTrace.current);
       return false;
     }
   }
   Future<void> signOut() async {
     await _authService.signOut();
+    state = const AsyncValue.data(null);
   }
 }

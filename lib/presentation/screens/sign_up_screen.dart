@@ -1,21 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:stylish_test_task/presentation/providers/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stylish_test_task/presentation/widgets/stylish_text_field.dart';
+import 'package:stylish_test_task/riverpod/auth_provider.dart';
 import 'package:stylish_test_task/utils/error_message_util.dart';
 import 'package:stylish_test_task/utils/loading_dialog_util.dart';
 import 'package:stylish_test_task/styles.dart';
 
-class SignUpScreen extends StatefulWidget {
+class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
 
   @override
-  State<SignUpScreen> createState() => _SignUpScreenState();
+  ConsumerState<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
+class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
@@ -101,8 +101,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
     FocusScope.of(context).requestFocus(FocusNode());
     showLoadingDialog(context);
-    final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.signUp(
+    final success = await ref.read(authNotifierProvider.notifier).signUp(
       emailController.text.trim(),
       passwordController.text.trim(),
     );
@@ -113,7 +112,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     } else {
       if (context.mounted) {
-        showErrorMessage(context, authProvider.errorMessage ?? 'Something went wrong');
+        showErrorMessage(
+          context,
+          ref.read(authNotifierProvider.notifier).errorMessage ?? 'Something went wrong',
+        );
       }
     }
   }

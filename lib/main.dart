@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:stylish_test_task/app.dart';
 import 'package:stylish_test_task/firebase_options.dart';
-import 'package:stylish_test_task/presentation/providers/auth_provider.dart';
-import 'package:stylish_test_task/presentation/providers/storage_provider.dart';
+import 'package:stylish_test_task/riverpod/auth_provider.dart';
+import 'package:stylish_test_task/riverpod/storage_provider.dart';
 import 'package:stylish_test_task/services/storage_service.dart';
 
 Future<void> main() async {
@@ -44,10 +44,10 @@ Future<void> main() async {
   FlutterNativeSplash.remove();
 
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider(user: currentUser)),
-        ChangeNotifierProvider<StorageProvider>(create: (_) => StorageProvider(userText: userText)),
+    ProviderScope(
+      overrides: [
+        authNotifierProvider.overrideWith(()=> AuthNotifier(user: currentUser)),
+        storageNotifierProvider.overrideWith(() => StorageNotifier(userText: userText)),
       ],
       child: StylishApp(initialRoute: initialRoute),
     ),

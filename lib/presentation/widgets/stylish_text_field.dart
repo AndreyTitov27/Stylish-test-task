@@ -26,6 +26,7 @@ class _StylishTextFieldState extends State<StylishTextField> {
   bool _obscure = true;
   @override
   Widget build(BuildContext context) {
+    // ignore: sized_box_for_whitespace
     return Container(
       height: 55.0,
       child: CupertinoTextField(
